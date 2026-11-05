@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0d1320">
 <title>素因数バトル</title>
+<!-- ミニゲーム集「you know games」の中にも入っている（kakutou/soinsu/）。そのときだけアプリの設定・アイコン・一覧へ戻るボタンを使う -->
+<script>
+window.IN_HUB = !/soinsu-battle/.test(location.pathname);
+if (window.IN_HUB) {
+  document.write('<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="you know games">'
+    + '<link rel="manifest" href="../manifest.json"><link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png"><link rel="apple-touch-icon" href="../apple-touch-icon.png">');
+}
+</script>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:#0d1320;color:#eef2ff;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
@@ -777,6 +785,7 @@ function renderUI() {
       <div class="seg">${[1, 3, 5, 7].map(n => `<button class="${n === practiceBots ? "on" : ""}" data-a="pb-${n}">${n}体</button>`).join("")}</div>
       <button class="btn sub" data-a="practice">CPUと練習する</button></div>
       <div class="row" style="margin-top:14px"><button class="btn sub" style="margin-top:0" data-a="layout">ボタン配置を変える</button><button class="btn sub" style="margin-top:0" data-a="sound">足音：${soundOn ? "ON" : "OFF"}</button></div>
+      ${window.IN_HUB ? `<button class="btn sub" data-a="games">← ゲーム一覧へ（you know games）</button>` : ""}
       ${errMsg ? `<div class="err">${esc(errMsg)}</div>` : ""}</div>`;
   } else if (screen === "layout") {
     h = `<div class="card"><span class="lbl">${LAY_NAMES[editSel]} ${Math.round(LAY[editSel].s * 100)}%</span>
@@ -813,6 +822,7 @@ $("screen").addEventListener("click", async e => {
   else if (a === "join") { fixName(); goLandscape(); joinRoom($("code").value); }
   else if (a === "practice") { fixName(); goLandscape(); startPractice(); renderUI(); }
   else if (a === "layout") { fixName(); enterLayout(); }
+  else if (a === "games") location.href = "../";   // ミニゲーム集のゲーム一覧へ
   else if (a === "laydone") exitLayout();
   else if (a === "laymove") $("screen").classList.toggle("bottom");
   else if (a === "lay+" || a === "lay-") { const L = LAY[editSel]; L.s = clamp(Math.round((L.s + (a === "lay+" ? 0.1 : -0.1)) * 10) / 10, 0.5, 2); saveLayout(); renderUI(); }
@@ -909,6 +919,7 @@ function frame(nowMs) {
 }
 renderUI();
 requestAnimationFrame(frame);
+try { if (window.IN_HUB && "serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) navigator.serviceWorker.register("../sw.js").catch(() => {}); } catch (e) {}
 window.__dbg = { view, get G() { return G; }, me, get myId() { return myId; }, step(n = 1) { for (let i = 0; i < n; i++) frame(last + 16); }, get actx() { return actx; } };
 </script>
 </body>
